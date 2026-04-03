@@ -585,4 +585,23 @@ function updateActiveNav(dayKey) {
 }
 
 // ── Click handling ──
-document.addEventList
+document.addEventListener("click", function(e) {
+  const link = e.target.closest("a[data-day]");
+  if (link) {
+    e.preventDefault();
+    renderDay(link.dataset.day);
+    return;
+  }
+  const homeLink = e.target.closest('a[href="index.html"]');
+  if (homeLink) {
+    e.preventDefault();
+    renderHome();
+    return;
+  }
+});
+
+// ── Init ──
+renderHome();
+</script>
+</body>
+</html>
