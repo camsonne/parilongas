@@ -499,6 +499,47 @@ function renderHome() {
   `;
 }
 
+// ── Render past events ──
+function renderPastEvents(pastEvents) {
+  if (!pastEvents || pastEvents.length === 0) {
+    return '<p style="color:var(--text-secondary);font-size:14px;padding:12px 0">Aucun événement passé. / No past events.</p>';
+  }
+
+  // Group past events by date
+  const byDate = {};
+  pastEvents.forEach(ev => {
+    const dateKey = ev.event_date || "Date inconnue";
+    if (!byDate[dateKey]) byDate[dateKey] = [];
+    byDate[dateKey].push(ev);
+  });
+
+  let html = '';
+  for (const [date, events] of Object.entries(byDate)) {
+    html += `<h3 style="font-size:15px;font-weight:500;color:var(--text-secondary);margin:16px 0 8px;padding:4px 0;border-bottom:1px dashed var(--border-color)">${date}</h3>`;
+    events.forEach(ev => {
+      const linksHtml = Object.entries(ev.links || {}).map(([label, url]) =>
+        `<a href="${url}" target="_blank" rel="noopener">${label}</a>`
+      ).join(" · ");
+
+      html += `
+        <div class="event-card" style="opacity:0.7;margin-bottom:20px;padding-bottom:20px">
+          <h2>${ev.time ? ev.time + ' — ' : ''}${ev.name} — <a href="${ev.map_url}" target="_blank">${ev.address}</a></h2>
+          <div class="event-details">
+            ${ev.venue ? `<span class="label">📌</span><span>${ev.venue}</span>` : ''}
+            ${ev.metro ? `<span class="label">Ⓜ️</span><span>${ev.metro}</span>` : ''}
+            ${ev.dj && ev.dj !== 'nc' ? `<span class="label">DJ</span><span>${ev.dj}</span>` : ''}
+            ${ev.show ? `<span class="label">💃</span><span>${ev.show}</span>` : ''}
+            ${ev.price ? `<span class="label">€</span><span>${ev.price}</span>` : ''}
+            ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
+            ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
+          </div>
+        </div>
+      `;
+    });
+  }
+  return html;
+}
+
 // ── Render a day page ──
 function renderDay(dayKey) {
   currentView = dayKey;
@@ -520,6 +561,7 @@ function renderDay(dayKey) {
   }
 
   const events = dayData.events;
+  const hasPastEvents = dayData.past_events && dayData.past_events.length > 0;
 
   // Quick nav to other days
   const quickNav = DAY_ORDER.map(d => {
@@ -528,10 +570,10 @@ function renderDay(dayKey) {
     return `<a href="#" data-day="${d}">${n.fr.substring(0,2)}-${n.en.substring(0,2)}</a>`;
   }).filter(Boolean).join('<span class="sep">|</span>');
 
-  // TOC
-  const toc = events.map(ev =>
-    `<a href="#${ev.id}">${ev.time} ▪️${ev.name}▪️ ${ev.address}</a>`
-  ).join("");
+  // TOC (only show if more than 1 event)
+  const toc = events.length > 1 ? events.map(ev =>
+    `<a href="#${ev.id}">${ev.time ? ev.time + ' — ' : ''}${ev.name} — ${ev.address}</a>`
+  ).join("") : "";
 
   // Event cards
   const cards = events.map(ev => {
@@ -541,11 +583,11 @@ function renderDay(dayKey) {
 
     return `
       <div class="event-card" id="${ev.id}">
-        <h2>${ev.time} ▪️${ev.name}▪️ <a href="${ev.map_url}" target="_blank">${ev.address}</a></h2>
+        <h2>${ev.time ? ev.time + ' — ' : ''}${ev.name} — <a href="${ev.map_url}" target="_blank">${ev.address}</a></h2>
         <div class="event-details">
           ${ev.venue ? `<span class="label">📌</span><span>${ev.venue}</span>` : ''}
           ${ev.metro ? `<span class="label">Ⓜ️</span><span>${ev.metro}</span>` : ''}
-          ${ev.dj ? `<span class="label">DJ</span><span>${ev.dj}</span>` : ''}
+          ${ev.dj && ev.dj !== 'nc' ? `<span class="label">DJ</span><span>${ev.dj}</span>` : ''}
           ${ev.show ? `<span class="label">💃</span><span>${ev.show}</span>` : ''}
           ${ev.price ? `<span class="label">€</span><span>${ev.price}</span>` : ''}
           ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
@@ -563,13 +605,13 @@ function renderDay(dayKey) {
       <div class="date">${dayData.date}</div>
     </div>
     <div class="day-quick-nav">${quickNav}</div>
-    <div class="toc">${toc}</div>
+    ${toc ? `<div class="toc">${toc}</div>` : ''}
     ${cards}
-    <h2 class="section-header">👩‍🎓 <a href="#">COURS DU ${dayName.fr} - ${dayName.en}'S LESSONS</a></h2>
-    <h2 class="section-header">🗓️ MILONGAS DES ${dayName.fr}S À VENIR</h2>
-    <p style="color:var(--text-secondary);font-size:14px">FUTURE ${dayName.en}S MILONGAS</p>
+    ${hasPastEvents ? `
     <h2 class="section-header">🗓️ MILONGAS DES ${dayName.fr}S PRÉCÉDENTS</h2>
     <p style="color:var(--text-secondary);font-size:14px">PREVIOUS ${dayName.en}S MILONGAS</p>
+    ${renderPastEvents(dayData.past_events)}
+    ` : ''}
   `;
 }
 
