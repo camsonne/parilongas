@@ -47,6 +47,19 @@
       "note": "Agenda de référence du tango argentin en France — listings Île-de-France"
     },
     {
+      "id": "quais-de-seine",
+      "name": "Milonga des Quais de Seine",
+      "type": "facebook",
+      "url": "https://www.facebook.com/groups/191669634330805/",
+      "days": [6, 0],
+      "venue": "Quais de Seine",
+      "address": "Quais de Seine, Paris",
+      "metro": "",
+      "default_dj": "nc",
+      "default_price": "gratuit",
+      "note": "Milonga en plein air — vérifier annulations météo sur Facebook"
+    },
+    {
       "id": "la-cosy",
       "name": "La Cosy",
       "type": "website",
