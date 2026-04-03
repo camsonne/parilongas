@@ -87,10 +87,28 @@ def scrape_facebook(source):
     return {}
 
 
+def is_paris_area(address, name=""):
+    """
+    Check if an event is in the Paris area (Paris + petite/grande couronne).
+    Accepts Paris (75), and surrounding départements: 77, 78, 91, 92, 93, 94, 95.
+    Also accepts events with 'Paris' in the address or no postal code (assumed local).
+    """
+    if not address:
+        return False
+    text = (address + " " + name).lower()
+    # Match 5-digit French postal codes
+    codes = re.findall(r"\b(\d{5})\b", address)
+    if codes:
+        return any(c[:2] in ("75", "77", "78", "91", "92", "93", "94", "95") for c in codes)
+    # No postal code — check for Paris keywords
+    return "paris" in text
+
+
 def scrape_aggregator_tango_argentin(source):
     """
     Scrape tango-argentin.fr/ile-de-france for upcoming events.
     Returns a list of event dicts (one per event found).
+    Only keeps events in the Paris area.
 
     Note: the site renders most content via JavaScript. This parser
     handles whatever is present in the static HTML; a headless browser
@@ -146,6 +164,10 @@ def scrape_aggregator_tango_argentin(source):
                         dj = re.sub(r"dj\s*:\s*", "", line, flags=re.I).strip()
                     elif not address and re.search(r"\d{5}", line):
                         address = line
+
+                # Skip events outside Paris area
+                if not is_paris_area(address, title):
+                    continue
 
                 event = {
                     "id": f"tango-argentin-{re.sub(r'[^a-z0-9]', '-', title.lower()[:40])}",
@@ -275,19 +297,21 @@ def collect_past_events(existing_data, today):
     if not existing_data:
         return past
 
-    # Carry over existing past_events
+    # Carry over existing past_events (only Paris area)
     for day_key in [str(d) for d in range(7)]:
         day_data = existing_data.get("days", {}).get(day_key, {})
         for ev in day_data.get("past_events", []):
-            past[day_key].append(ev)
+            if is_paris_area(ev.get("address", ""), ev.get("name", "")):
+                past[day_key].append(ev)
 
-    # Move current events whose date has passed into past
+    # Move current events whose date has passed into past (only Paris area)
     for day_key in [str(d) for d in range(7)]:
         day_data = existing_data.get("days", {}).get(day_key, {})
         for ev in day_data.get("events", []):
             event_date = _parse_date_str(ev.get("event_date", ""))
             if event_date and event_date.date() < today.date():
-                past[day_key].append(ev)
+                if is_paris_area(ev.get("address", ""), ev.get("name", "")):
+                    past[day_key].append(ev)
 
     # Sort by event_date descending (newest first) and limit
     for day_key in past:
