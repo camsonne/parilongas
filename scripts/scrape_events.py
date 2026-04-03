@@ -87,6 +87,100 @@ def scrape_facebook(source):
     return {}
 
 
+def scrape_aggregator_tango_argentin(source):
+    """
+    Scrape tango-argentin.fr/ile-de-france for upcoming events.
+    Returns a list of event dicts (one per event found).
+
+    Note: the site renders most content via JavaScript. This parser
+    handles whatever is present in the static HTML; a headless browser
+    (e.g. Playwright) would be needed for full results.
+
+    Event format on the page (text block per event):
+        <event title>
+        <address>
+        de HHhMM à HHhMM  <price>
+        DJ : <name>
+    """
+    events = []
+    try:
+        resp = requests.get(source["url"], headers=HEADERS, timeout=15)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        # Day headers are in <h6> tags; events follow until the next header.
+        # We track the current date as we walk the siblings.
+        current_date = ""
+        current_day_num = None
+
+        for tag in soup.find_all(["h6", "a"]):
+            if tag.name == "h6":
+                # Date header e.g. "Vendredi 4 avril 2026"
+                current_date = tag.get_text(strip=True)
+                current_day_num = _parse_fr_day(current_date)
+                continue
+
+            if tag.name == "a" and current_day_num is not None:
+                # Each linked block is one event
+                block = tag.get_text(separator="\n", strip=True)
+                lines = [l.strip() for l in block.splitlines() if l.strip()]
+                if not lines:
+                    continue
+
+                title = lines[0]
+                address = ""
+                time_str = ""
+                price = ""
+                dj = "nc"
+
+                for line in lines[1:]:
+                    if re.match(r"de \d", line, re.I):
+                        # "de 19h30 à 01h00  10 euros..."
+                        time_match = re.match(r"de (\d+h\d*) à (\d+h\d*)", line, re.I)
+                        if time_match:
+                            time_str = time_match.group(1).replace("h", ":").ljust(5, "0")
+                        price_part = re.sub(r"de \d+h\d* à \d+h\d*\s*", "", line).strip()
+                        if price_part:
+                            price = price_part
+                    elif re.match(r"dj\s*:", line, re.I):
+                        dj = re.sub(r"dj\s*:\s*", "", line, flags=re.I).strip()
+                    elif not address and re.search(r"\d{5}", line):
+                        address = line
+
+                event = {
+                    "id": f"tango-argentin-{re.sub(r'[^a-z0-9]', '-', title.lower()[:40])}",
+                    "name": title,
+                    "address": address,
+                    "map_url": f"https://www.google.com/maps/search/{address.replace(' ', '+')}",
+                    "venue": "",
+                    "metro": "",
+                    "time": time_str,
+                    "dj": dj,
+                    "price": price,
+                    "links": {"Site": tag.get("href", source["url"])},
+                    "recurrence": "",
+                    "image": "",
+                    "_day": current_day_num,
+                    "_date": current_date,
+                }
+                events.append(event)
+
+    except Exception as e:
+        print(f"  ⚠ Could not scrape {source['url']}: {e}", file=sys.stderr)
+
+    return events
+
+
+def _parse_fr_day(text):
+    """Extract JS-convention day number (0=Sun…6=Sat) from a French date string."""
+    fr_days = {
+        "lundi": 1, "mardi": 2, "mercredi": 3, "jeudi": 4,
+        "vendredi": 5, "samedi": 6, "dimanche": 0,
+    }
+    word = text.split()[0].lower() if text else ""
+    return fr_days.get(word)
+
+
 def build_event(source, dynamic_data):
     """Merge source defaults with any scraped dynamic data."""
     event = {
@@ -148,14 +242,28 @@ def main():
     # Process each source
     for source in sources:
         print(f"📡 Processing: {source['name']}")
-        
+
+        if source["type"] == "aggregator":
+            # Aggregators return a list of fully-formed events keyed by day
+            if source["id"] == "tango-argentin":
+                agg_events = scrape_aggregator_tango_argentin(source)
+            else:
+                agg_events = []
+            for event in agg_events:
+                day = event.pop("_day", None)
+                event.pop("_date", None)
+                if day is not None:
+                    days[str(day)]["events"].append(event)
+            print(f"   → {len(agg_events)} events found")
+            continue
+
         # Scrape for dynamic data
         dynamic = {}
         if source["type"] == "website":
             dynamic = scrape_website(source)
         elif source["type"] == "facebook":
             dynamic = scrape_facebook(source)
-        
+
         # Build event and add to each relevant day
         event = build_event(source, dynamic)
         for day in source.get("days", []):
