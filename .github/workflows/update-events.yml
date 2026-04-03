@@ -64,7 +64,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: main  # get latest commit from update step
+          ref: master  # get latest commit from update step
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
