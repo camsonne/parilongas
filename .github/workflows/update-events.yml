@@ -1,0 +1,78 @@
+# .github/workflows/update-events.yml
+# 
+# This workflow runs daily at 6 AM Paris time.
+# It scrapes event sources, generates fresh JSON data,
+# and commits the updated site to GitHub Pages.
+
+name: Update Parilongas Events
+
+on:
+  schedule:
+    # 6:00 AM Paris time (4:00 AM UTC in winter, 5:00 AM UTC in summer)
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update-events:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml
+
+      - name: Run event scraper
+        env:
+          # Optional: Facebook Graph API token for event scraping
+          # FB_ACCESS_TOKEN: ${{ secrets.FB_ACCESS_TOKEN }}
+          SOURCES_FILE: data/sources.json
+          OUTPUT_FILE: data/events.json
+        run: python scripts/scrape_events.py
+
+      - name: Build site (inject data into HTML)
+        run: python scripts/build_site.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "Parilongas Bot"
+          git config user.email "bot@parilongas.fr"
+          git add -A
+          # Only commit if there are changes
+          git diff --staged --quiet || git commit -m "Auto-update events $(date +%Y-%m-%d)"
+          git push
+
+  # Deploy to GitHub Pages
+  deploy:
+    needs: update-events
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main  # get latest commit from update step
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './site'
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

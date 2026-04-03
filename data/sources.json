@@ -1,0 +1,54 @@
+{
+  "description": "List of event sources to scrape daily. Each source has a type (website, facebook, instagram) and the day(s) it typically runs.",
+  "sources": [
+    {
+      "id": "cascabelito",
+      "name": "Pratique Cascabelito",
+      "type": "website",
+      "url": "https://www.cascabelito.fr/pratiques/",
+      "days": [5],
+      "venue": "Salle de danse Pliaska",
+      "address": "75 rue de Dunkerque 75009 Paris",
+      "metro": "Anvers (ligne 2) / Gare du Nord (lignes 4,5,B,D)",
+      "default_dj": "Sylvain",
+      "default_price": "4€"
+    },
+    {
+      "id": "milonga-du-chat",
+      "name": "La Milonga du Chat",
+      "type": "facebook",
+      "url": "https://www.facebook.com/groups/1633867090170359",
+      "days": [5],
+      "venue": "Studio Laplace au fond de la cour",
+      "address": "56 av Laplace 94110 Arcueil",
+      "metro": "Laplace (RER B) - Barbara (ligne 4)",
+      "default_dj": "Tano",
+      "default_price": "12€ (10€ étudiant)"
+    },
+    {
+      "id": "parisiana",
+      "name": "La Parisiana",
+      "type": "facebook",
+      "url": "https://www.facebook.com/groups/591405635447130",
+      "days": [1, 2, 3, 4, 5, 6, 0],
+      "venue": "Le Vent Se Lève",
+      "address": "179 av. Jean Jaurès 75019 Paris",
+      "metro": "Ourcq (ligne 5)",
+      "default_dj": "nc",
+      "default_price": "10€/12€"
+    },
+    {
+      "id": "la-cosy",
+      "name": "La Cosy",
+      "type": "website",
+      "url": "https://example.com/la-cosy",
+      "days": [2],
+      "venue": "136 rue de Lourmel",
+      "address": "136 rue de Lourmel 75015 Paris",
+      "metro": "Boucicaut (ligne 8)",
+      "default_dj": "Jean-Christophe",
+      "default_price": "12€"
+    }
+  ],
+  "notes": "Add new sources here. The scraper will check each source's URL for upcoming event info (date changes, special guests, cancellations). Static defaults are used as fallback."
+}

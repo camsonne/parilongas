@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parilongas.fr — L'agenda du tango à Paris</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --header-bg: #4285f4;
+      --nav-bg: #ffffff;
+      --body-bg: #ffffff;
+      --text-primary: #202124;
+      --text-secondary: #5f6368;
+      --link-color: #1a73e8;
+      --border-color: #e0e0e0;
+      --card-bg: #ffffff;
+      --section-bg: #f8f9fa;
+      --accent: #4285f4;
+      --max-width: 960px;
+      --nav-height: 56px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Roboto', -apple-system, sans-serif;
+      color: var(--text-primary);
+      background: var(--body-bg);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: var(--header-bg);
+      color: #fff;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px rgba(0,0,0,.15);
+    }
+    .site-header .logo {
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: .3px;
+      text-decoration: none;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .site-header .logo img {
+      height: 32px;
+      border-radius: 4px;
+    }
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+
+    /* ── NAV ── */
+    .site-nav {
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--border-color);
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+    }
+    .site-nav .nav-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0;
+    }
+    .site-nav a {
+      display: inline-block;
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      transition: all .2s;
+    }
+    .site-nav a:hover,
+    .site-nav a.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    /* ── DAY HEADER ── */
+    .day-header {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .day-header h1 {
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .day-header .date {
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+
+    /* ── DAY QUICK-NAV ── */
+    .day-quick-nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 12px 0 28px;
+    }
+    .day-quick-nav a {
+      font-size: 13px;
+      color: var(--link-color);
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background .15s;
+    }
+    .day-quick-nav a:hover {
+      background: #e8f0fe;
+    }
+    .day-quick-nav .sep { color: #ccc; user-select: none; }
+
+    /* ── TOC (top event list) ── */
+    .toc {
+      background: var(--section-bg);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 32px;
+    }
+    .toc a {
+      display: block;
+      padding: 6px 0;
+      font-size: 14px;
+      color: var(--text-primary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .toc a:last-child { border-bottom: none; }
+    .toc a:hover { color: var(--link-color); }
+
+    /* ── EVENT CARD ── */
+    .event-card {
+      margin-bottom: 36px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .event-card:last-child { border-bottom: none; }
+
+    .event-card h2 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .event-card h2 a {
+      color: var(--link-color);
+      text-decoration: none;
+    }
+    .event-card h2 a:hover { text-decoration: underline; }
+
+    .event-details {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 4px 12px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .event-details .label {
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .event-card .event-image {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 8px;
+      max-height: 260px;
+      object-fit: cover;
+    }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      font-size: 18px;
+      font-weight: 500;
+      margin: 40px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-color);
+    }
+    .site-footer a { color: var(--link-color); text-decoration: none; }
+
+    /* ── HOME / LANDING ── */
+    .hero {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    .hero .subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto 28px;
+    }
+
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 12px;
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+    .day-grid a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 8px;
+      background: var(--section-bg);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 500;
+      transition: box-shadow .2s, transform .15s;
+      border: 1px solid var(--border-color);
+    }
+    .day-grid a:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      transform: translateY(-2px);
+    }
+    .day-grid a .emoji { font-size: 28px; margin-bottom: 6px; }
+
+    .welcome-text {
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+      font-size: 15px;
+      color: var(--text-secondary);
+      padding: 20px;
+    }
+
+    .cta-bar {
+      text-align: center;
+      margin: 28px 0;
+    }
+    .cta-bar a {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .cta-bar a:hover { background: #3367d6; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .site-header { padding: 0 12px; }
+      .hamburger { display: block; }
+      .main-content { padding: 16px 12px 40px; }
+      .day-header h1 { font-size: 22px; }
+      .day-grid { grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; }
+      .hero h1 { font-size: 24px; }
+    }
+
+    /* ── LOADING STATE ── */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    .loading .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <button class="hamburger" onclick="document.querySelector('.site-nav').classList.toggle('open')">☰</button>
+    <a class="logo" href="index.html">
+      📅 Parilongas.fr
+    </a>
+  </header>
+
+  <!-- NAV -->
+  <nav class="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="active">🗓️ Milongas</a>
+      <a href="#" data-day="1">📅 Lundi</a>
+      <a href="#" data-day="2">📅 Mardi</a>
+      <a href="#" data-day="3">📅 Mercredi</a>
+      <a href="#" data-day="4">📅 Jeudi</a>
+      <a href="#" data-day="5">📅 Vendredi</a>
+      <a href="#" data-day="6">📅 Samedi</a>
+      <a href="#" data-day="0">📅 Dimanche</a>
+      <a href="#">👩‍🎓 Cours</a>
+      <a href="#">📢 News</a>
+      <a href="#">❓ FAQ</a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main-content" id="app">
+    <!-- Rendered by JS -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>©️ parilongas — <a href="/cdn-cgi/l/email-protection#7a1915140e1b190e3a0a1b08131615141d1b09541c08"><span class="__cf_email__" data-cfemail="accfc3c2d8cdcfd8ecdccddec5c0c3c2cbcddf82cade">[email&#160;protected]</span></a></p>
+    <p style="margin-top:4px">Powered by GitHub Pages · Data auto-updated daily</p>
+  </footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ══════════════════════════════════════════════════
+// DATA-DRIVEN STATIC SITE FOR PARILONGAS
+// ══════════════════════════════════════════════════
+// In production, this JSON file is generated by a GitHub Action
+// that scrapes organizer sources daily and commits the update.
+
+const SAMPLE_DATA = {
+  "last_updated": "2026-04-03T08:00:00Z",
+  "days": {
+    "5": {
+      "name_fr": "VENDREDI",
+      "name_en": "FRIDAY",
+      "date": "03/04/2026",
+      "events": [
+        {
+          "id": "cosy-ven",
+          "time": "19:30-23:45",
+          "name": "Pratique Cascabelito",
+          "address": "75 rue de Dunkerque 75009 Paris",
+          "map_url": "https://maps.app.goo.gl/8QnpojBEgZ9H5Nt38",
+          "venue": "Salle de danse Pliaska (50m2)",
+          "metro": "Anvers (ligne 2) / Gare du Nord (lignes 4,5,B,D)",
+          "dj": "Sylvain",
+          "price": "4€",
+          "links": {"Email": "mailto:contact@cascabelito.fr", "Site": "https://www.cascabelito.fr/pratiques/"},
+          "recurrence": "tous les vendredis / every Friday",
+          "image": ""
+        },
+        {
+          "id": "chat-ven",
+          "time": "20:30-02:00",
+          "name": "La Milonga du Chat",
+          "address": "56 av Laplace 94110 Arcueil",
+          "map_url": "https://maps.app.goo.gl/TAhknSFAFDfc1Fnk7",
+          "venue": "Studio Laplace au fond de la cour (code porte rue : 1512)",
+          "metro": "Laplace (RER B) - Barbara (ligne 4)",
+          "dj": "Tano",
+          "price": "12€ (10€ étudiant)",
+          "show": "19h30-20h30 Atelier Tango Jessica Estigarribia et Jonathan Chiqui Canete",
+          "links": {"Email": "mailto:yory7@yahoo.com", "Facebook": "https://www.facebook.com/groups/1633867090170359"},
+          "phone": "06 98 25 57 49",
+          "recurrence": "tous les vendredis / every Friday",
+          "image": ""
+        },
+        {
+          "id": "parisiana-ven",
+          "time": "20:30-01:00",
+          "name": "La Parisiana",
+          "address": "179 av. Jean Jaurès 75019 Paris",
+          "map_url": "https://www.google.com/maps?q=179+Av.+Jean+Jaurès,+75019+Paris",
+          "venue": "Le Vent Se Lève ; portail à droite / gate on the right",
+          "metro": "Ourcq (ligne 5)",
+          "dj": "nc",
+          "price": "10€/12€ Entrée 10€ avant 21h30 et 12€ après",
+          "links": {"Facebook": "https://www.facebook.com/groups/591405635447130", "Email": "mailto:arnotango@yahoo.fr"},
+          "phone": "06 52 63 61 08",
+          "recurrence": "tous les vendredis / every Friday",
+          "image": ""
+        }
+      ]
+    },
+    "6": {
+      "name_fr": "SAMEDI",
+      "name_en": "SATURDAY",
+      "date": "04/04/2026",
+      "events": [
+        {
+          "id": "sample-sam",
+          "time": "21:00-02:00",
+          "name": "Milonga Exemple Samedi",
+          "address": "Exemple adresse Paris",
+          "map_url": "#",
+          "venue": "Salle exemple",
+          "metro": "Exemple (ligne X)",
+          "dj": "DJ Exemple",
+          "price": "10€",
+          "links": {},
+          "recurrence": "",
+          "image": ""
+        }
+      ]
+    }
+  }
+};
+
+// ── Day mapping ──
+const DAY_NAMES = {
+  "1": {fr: "LUNDI", en: "MONDAY"},
+  "2": {fr: "MARDI", en: "TUESDAY"},
+  "3": {fr: "MERCREDI", en: "WEDNESDAY"},
+  "4": {fr: "JEUDI", en: "THURSDAY"},
+  "5": {fr: "VENDREDI", en: "FRIDAY"},
+  "6": {fr: "SAMEDI", en: "SATURDAY"},
+  "0": {fr: "DIMANCHE", en: "SUNDAY"},
+};
+
+const DAY_ORDER = ["1","2","3","4","5","6","0"];
+
+let currentView = "home";
+const app = document.getElementById("app");
+
+// ── Render home page ──
+function renderHome() {
+  currentView = "home";
+  updateActiveNav(null);
+  const today = new Date();
+  const todayDay = String(today.getDay());
+  
+  app.innerHTML = `
+    <div class="hero">
+      <h1>L'AGENDA DU TANGO À PARIS</h1>
+      <p class="subtitle">
+        Bienvenue sur Parilongas, l'agenda des milongas, bals, pratiques et cours de tango argentin à Paris et en banlieue !
+      </p>
+    </div>
+
+    <div class="day-grid">
+      ${DAY_ORDER.map(d => {
+        const n = DAY_NAMES[d];
+        const isToday = d === todayDay;
+        return `<a href="#" data-day="${d}" ${isToday ? 'style="border-color:var(--accent);background:#e8f0fe"' : ''}>
+          <span class="emoji">📅</span>
+          ${n.fr}
+          ${isToday ? '<small style="color:var(--accent);font-size:11px">Aujourd\'hui</small>' : ''}
+        </a>`;
+      }).join("")}
+    </div>
+
+    <div class="welcome-text">
+      <p>Ce site web collaboratif permet à toute personne organisatrice d'inclure elle-même des événements ponctuels ou récurrents.</p>
+      <p style="margin-top:8px">Pour les danseurs, une vérification avant tout déplacement est fortement recommandée.</p>
+    </div>
+
+    <div class="cta-bar">
+      <a href="#">ORGANISATEURS : PUBLIEZ VOS ACTIVITÉS</a>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--text-secondary)">
+      Dernière mise à jour : ${new Date(SAMPLE_DATA.last_updated).toLocaleString('fr-FR')}
+    </div>
+  `;
+}
+
+// ── Render a day page ──
+function renderDay(dayKey) {
+  currentView = dayKey;
+  updateActiveNav(dayKey);
+  
+  const dayData = SAMPLE_DATA.days[dayKey];
+  const dayName = DAY_NAMES[dayKey];
+
+  if (!dayData || !dayData.events.length) {
+    app.innerHTML = `
+      <div class="day-header">
+        <h1>${dayName.fr} - ${dayName.en}</h1>
+      </div>
+      <p style="text-align:center;color:var(--text-secondary);padding:40px">
+        Aucun événement pour ce jour. / No events for this day.
+      </p>
+    `;
+    return;
+  }
+
+  const events = dayData.events;
+
+  // Quick nav to other days
+  const quickNav = DAY_ORDER.map(d => {
+    if (d === dayKey) return null;
+    const n = DAY_NAMES[d];
+    return `<a href="#" data-day="${d}">${n.fr.substring(0,2)}-${n.en.substring(0,2)}</a>`;
+  }).filter(Boolean).join('<span class="sep">|</span>');
+
+  // TOC
+  const toc = events.map(ev =>
+    `<a href="#${ev.id}">${ev.time} ▪️${ev.name}▪️ ${ev.address}</a>`
+  ).join("");
+
+  // Event cards
+  const cards = events.map(ev => {
+    const linksHtml = Object.entries(ev.links || {}).map(([label, url]) =>
+      `<a href="${url}" target="_blank" rel="noopener">${label}</a>`
+    ).join(" · ");
+
+    return `
+      <div class="event-card" id="${ev.id}">
+        <h2>${ev.time} ▪️${ev.name}▪️ <a href="${ev.map_url}" target="_blank">${ev.address}</a></h2>
+        <div class="event-details">
+          ${ev.venue ? `<span class="label">📌</span><span>${ev.venue}</span>` : ''}
+          ${ev.metro ? `<span class="label">Ⓜ️</span><span>${ev.metro}</span>` : ''}
+          ${ev.dj ? `<span class="label">DJ</span><span>${ev.dj}</span>` : ''}
+          ${ev.show ? `<span class="label">💃</span><span>${ev.show}</span>` : ''}
+          ${ev.price ? `<span class="label">€</span><span>${ev.price}</span>` : ''}
+          ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
+          ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
+          ${ev.recurrence ? `<span class="label">🗓️</span><span>${ev.recurrence}</span>` : ''}
+        </div>
+        ${ev.image ? `<img class="event-image" src="${ev.image}" alt="${ev.name}" loading="lazy">` : ''}
+      </div>
+    `;
+  }).join("");
+
+  app.innerHTML = `
+    <div class="day-header">
+      <h1>${dayName.fr} - ${dayName.en}</h1>
+      <div class="date">${dayData.date}</div>
+    </div>
+    <div class="day-quick-nav">${quickNav}</div>
+    <div class="toc">${toc}</div>
+    ${cards}
+    <h2 class="section-header">👩‍🎓 <a href="#">COURS DU ${dayName.fr} - ${dayName.en}'S LESSONS</a></h2>
+    <h2 class="section-header">🗓️ MILONGAS DES ${dayName.fr}S À VENIR</h2>
+    <p style="color:var(--text-secondary);font-size:14px">FUTURE ${dayName.en}S MILONGAS</p>
+    <h2 class="section-header">🗓️ MILONGAS DES ${dayName.fr}S PRÉCÉDENTS</h2>
+    <p style="color:var(--text-secondary);font-size:14px">PREVIOUS ${dayName.en}S MILONGAS</p>
+  `;
+}
+
+// ── Nav active state ──
+function updateActiveNav(dayKey) {
+  document.querySelectorAll('.site-nav a').forEach(a => a.classList.remove('active'));
+  if (dayKey === null) {
+    document.querySelector('.site-nav a[href="index.html"]').classList.add('active');
+  } else {
+    const el = document.querySelector(`.site-nav a[data-day="${dayKey}"]`);
+    if (el) el.classList.add('active');
+  }
+}
+
+// ── Click handling ──
+document.addEventList
