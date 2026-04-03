@@ -181,6 +181,24 @@ def _parse_fr_day(text):
     return fr_days.get(word)
 
 
+def _fr_date_to_ddmmyyyy(text):
+    """Convert a French date like 'Vendredi 4 avril 2026' to '04/04/2026'."""
+    fr_months = {
+        "janvier": 1, "février": 2, "mars": 3, "avril": 4,
+        "mai": 5, "juin": 6, "juillet": 7, "août": 8,
+        "septembre": 9, "octobre": 10, "novembre": 11, "décembre": 12,
+    }
+    try:
+        parts = text.lower().split()
+        # Expected: ["vendredi", "4", "avril", "2026"]
+        day_num = int(parts[1])
+        month_num = fr_months.get(parts[2], 0)
+        year = int(parts[3])
+        return f"{day_num:02d}/{month_num:02d}/{year}"
+    except (IndexError, ValueError):
+        return ""
+
+
 def build_event(source, dynamic_data):
     """Merge source defaults with any scraped dynamic data."""
     event = {
@@ -224,11 +242,73 @@ def get_date_for_day(day_num):
     return target.strftime("%d/%m/%Y")
 
 
+MAX_PAST_EVENTS_PER_DAY = 20
+
+
+def load_existing_events():
+    """Load existing events.json to preserve past events across runs."""
+    try:
+        with open(OUTPUT_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
+
+
+def _parse_date_str(date_str):
+    """Parse a DD/MM/YYYY date string into a datetime object."""
+    try:
+        return datetime.strptime(date_str, "%d/%m/%Y")
+    except (ValueError, TypeError):
+        return None
+
+
+def collect_past_events(existing_data, today):
+    """
+    Move dated events from previous run into past_events.
+    Events with an event_date that has passed become past events.
+    Returns a dict of day_key -> list of past events (newest first).
+    """
+    past = {}
+    for d in range(7):
+        past[str(d)] = []
+
+    if not existing_data:
+        return past
+
+    # Carry over existing past_events
+    for day_key in [str(d) for d in range(7)]:
+        day_data = existing_data.get("days", {}).get(day_key, {})
+        for ev in day_data.get("past_events", []):
+            past[day_key].append(ev)
+
+    # Move current events whose date has passed into past
+    for day_key in [str(d) for d in range(7)]:
+        day_data = existing_data.get("days", {}).get(day_key, {})
+        for ev in day_data.get("events", []):
+            event_date = _parse_date_str(ev.get("event_date", ""))
+            if event_date and event_date.date() < today.date():
+                past[day_key].append(ev)
+
+    # Sort by event_date descending (newest first) and limit
+    for day_key in past:
+        past[day_key].sort(
+            key=lambda e: _parse_date_str(e.get("event_date", "")) or datetime.min,
+            reverse=True,
+        )
+        past[day_key] = past[day_key][:MAX_PAST_EVENTS_PER_DAY]
+
+    return past
+
+
 def main():
     print("🔄 Loading sources...")
     sources = load_sources()
     print(f"   Found {len(sources)} sources")
-    
+
+    # Load existing data for past events accumulation
+    existing_data = load_existing_events()
+    today = datetime.now()
+
     # Initialize days structure
     days = {}
     for d in range(7):
@@ -236,9 +316,15 @@ def main():
             "name_fr": DAY_NAMES[d]["fr"],
             "name_en": DAY_NAMES[d]["en"],
             "date": get_date_for_day(d),
-            "events": []
+            "events": [],
+            "past_events": []
         }
-    
+
+    # Collect past events from previous run
+    past_events = collect_past_events(existing_data, today)
+    for day_key, events in past_events.items():
+        days[day_key]["past_events"] = events
+
     # Process each source
     for source in sources:
         print(f"📡 Processing: {source['name']}")
@@ -251,7 +337,9 @@ def main():
                 agg_events = []
             for event in agg_events:
                 day = event.pop("_day", None)
-                event.pop("_date", None)
+                event_date_str = event.pop("_date", None)
+                if event_date_str:
+                    event["event_date"] = _fr_date_to_ddmmyyyy(event_date_str)
                 if day is not None:
                     days[str(day)]["events"].append(event)
             print(f"   → {len(agg_events)} events found")
@@ -268,23 +356,25 @@ def main():
         event = build_event(source, dynamic)
         for day in source.get("days", []):
             days[str(day)]["events"].append(event.copy())
-    
+
     # Sort events by time within each day
     for d in days.values():
         d["events"].sort(key=lambda e: e.get("time", "99:99"))
-    
+        # Past events are already sorted newest-first
+
     # Write output
     output = {
         "last_updated": datetime.utcnow().isoformat() + "Z",
         "days": days
     }
-    
+
     Path(OUTPUT_FILE).parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
-    
+
     total_events = sum(len(d["events"]) for d in days.values())
-    print(f"✅ Wrote {total_events} events across 7 days to {OUTPUT_FILE}")
+    total_past = sum(len(d["past_events"]) for d in days.values())
+    print(f"✅ Wrote {total_events} events + {total_past} past events across 7 days to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

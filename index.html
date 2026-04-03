@@ -499,6 +499,47 @@ function renderHome() {
   `;
 }
 
+// ── Render past events ──
+function renderPastEvents(pastEvents) {
+  if (!pastEvents || pastEvents.length === 0) {
+    return '<p style="color:var(--text-secondary);font-size:14px;padding:12px 0">Aucun événement passé. / No past events.</p>';
+  }
+
+  // Group past events by date
+  const byDate = {};
+  pastEvents.forEach(ev => {
+    const dateKey = ev.event_date || "Date inconnue";
+    if (!byDate[dateKey]) byDate[dateKey] = [];
+    byDate[dateKey].push(ev);
+  });
+
+  let html = '';
+  for (const [date, events] of Object.entries(byDate)) {
+    html += `<h3 style="font-size:15px;font-weight:500;color:var(--text-secondary);margin:16px 0 8px;padding:4px 0;border-bottom:1px dashed var(--border-color)">${date}</h3>`;
+    events.forEach(ev => {
+      const linksHtml = Object.entries(ev.links || {}).map(([label, url]) =>
+        `<a href="${url}" target="_blank" rel="noopener">${label}</a>`
+      ).join(" · ");
+
+      html += `
+        <div class="event-card" style="opacity:0.7;margin-bottom:20px;padding-bottom:20px">
+          <h2>${ev.time} ▪️${ev.name}▪️ <a href="${ev.map_url}" target="_blank">${ev.address}</a></h2>
+          <div class="event-details">
+            ${ev.venue ? `<span class="label">📌</span><span>${ev.venue}</span>` : ''}
+            ${ev.metro ? `<span class="label">Ⓜ️</span><span>${ev.metro}</span>` : ''}
+            ${ev.dj ? `<span class="label">DJ</span><span>${ev.dj}</span>` : ''}
+            ${ev.show ? `<span class="label">💃</span><span>${ev.show}</span>` : ''}
+            ${ev.price ? `<span class="label">€</span><span>${ev.price}</span>` : ''}
+            ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
+            ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
+          </div>
+        </div>
+      `;
+    });
+  }
+  return html;
+}
+
 // ── Render a day page ──
 function renderDay(dayKey) {
   currentView = dayKey;
@@ -570,6 +611,7 @@ function renderDay(dayKey) {
     <p style="color:var(--text-secondary);font-size:14px">FUTURE ${dayName.en}S MILONGAS</p>
     <h2 class="section-header">🗓️ MILONGAS DES ${dayName.fr}S PRÉCÉDENTS</h2>
     <p style="color:var(--text-secondary);font-size:14px">PREVIOUS ${dayName.en}S MILONGAS</p>
+    ${renderPastEvents(dayData.past_events || [])}
   `;
 }
 
