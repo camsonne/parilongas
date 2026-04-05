@@ -47,29 +47,82 @@ def load_sources():
         return json.load(f)["sources"]
 
 
+def extract_media(soup, base_url=""):
+    """
+    Extract image and video URLs from a page.
+    Returns dict with 'image' and 'video' keys.
+    """
+    result = {"image": "", "video": ""}
+
+    # Look for Open Graph image (most reliable for event pages)
+    og_image = soup.find("meta", property="og:image")
+    if og_image and og_image.get("content"):
+        result["image"] = og_image["content"]
+
+    # Fallback: find the first large-ish content image
+    if not result["image"]:
+        for img in soup.find_all("img"):
+            src = img.get("src", "")
+            if not src:
+                continue
+            # Skip tiny icons, trackers, etc.
+            width = img.get("width", "")
+            height = img.get("height", "")
+            if width and width.isdigit() and int(width) < 100:
+                continue
+            if height and height.isdigit() and int(height) < 100:
+                continue
+            # Skip common non-content patterns
+            skip = ["logo", "icon", "avatar", "pixel", "tracker", "badge", "button", "banner-ad"]
+            if any(s in src.lower() for s in skip):
+                continue
+            # Make absolute URL
+            if src.startswith("//"):
+                src = "https:" + src
+            elif src.startswith("/") and base_url:
+                from urllib.parse import urlparse
+                parsed = urlparse(base_url)
+                src = f"{parsed.scheme}://{parsed.netloc}{src}"
+            result["image"] = src
+            break
+
+    # Look for video: og:video, YouTube/Vimeo embeds
+    og_video = soup.find("meta", property="og:video")
+    if og_video and og_video.get("content"):
+        result["video"] = og_video["content"]
+
+    if not result["video"]:
+        for iframe in soup.find_all("iframe"):
+            src = iframe.get("src", "")
+            if "youtube" in src or "youtu.be" in src or "vimeo" in src:
+                result["video"] = src
+                break
+
+    return result
+
+
 def scrape_website(source):
     """
     Attempt to scrape a website for event updates.
-    Returns dict with any dynamic info found (dj, time, special notes).
+    Returns dict with any dynamic info found (dj, time, image, video, special notes).
     Falls back to source defaults if scraping fails.
     """
     try:
         resp = requests.get(source["url"], headers=HEADERS, timeout=15)
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "lxml")
-        
-        # --- Customise parsing per source ---
-        # This is where you add source-specific scraping logic.
-        # For now, return empty (use defaults).
-        # 
-        # Example pattern:
-        # text = soup.get_text()
-        # dj_match = re.search(r'DJ\s*[:\-]?\s*(.+)', text)
-        # if dj_match:
-        #     return {"dj": dj_match.group(1).strip()}
-        
-        return {}
-        
+
+        result = {}
+
+        # Extract media (images, videos)
+        media = extract_media(soup, source["url"])
+        if media["image"]:
+            result["image"] = media["image"]
+        if media["video"]:
+            result["video"] = media["video"]
+
+        return result
+
     except Exception as e:
         print(f"  ⚠ Could not scrape {source['url']}: {e}", file=sys.stderr)
         return {}
@@ -151,6 +204,14 @@ def scrape_aggregator_tango_argentin(source):
                 price = ""
                 dj = "nc"
 
+                # Extract image from within the link tag
+                event_image = ""
+                img_tag = tag.find("img")
+                if img_tag and img_tag.get("src"):
+                    event_image = img_tag["src"]
+                    if event_image.startswith("/"):
+                        event_image = "https://www.tango-argentin.fr" + event_image
+
                 for line in lines[1:]:
                     if re.match(r"de \d", line, re.I):
                         # "de 19h30 à 01h00  10 euros..."
@@ -181,7 +242,8 @@ def scrape_aggregator_tango_argentin(source):
                     "price": price,
                     "links": {"Site": tag.get("href", source["url"])},
                     "recurrence": "",
-                    "image": "",
+                    "image": event_image,
+                    "video": "",
                     "_day": current_day_num,
                     "_date": current_date,
                 }
@@ -235,7 +297,8 @@ def build_event(source, dynamic_data):
         "price": dynamic_data.get("price", source.get("default_price", "")),
         "links": {},
         "recurrence": source.get("recurrence", ""),
-        "image": dynamic_data.get("image", ""),
+        "image": dynamic_data.get("image", source.get("default_image", "")),
+        "video": dynamic_data.get("video", source.get("default_video", "")),
     }
     
     # Build links from source URL
