@@ -201,6 +201,23 @@
       object-fit: cover;
     }
 
+    /* ── VIDEO EMBED ── */
+    .event-video {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      padding-bottom: min(56.25%, 315px);
+      margin-top: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .event-video iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
     /* ── SECTION HEADERS ── */
     .section-header {
       font-size: 18px;
@@ -499,6 +516,21 @@ function renderHome() {
   `;
 }
 
+// ── Render video embed ──
+function renderVideo(url) {
+  if (!url) return '';
+  let embedUrl = url;
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  if (ytMatch) {
+    embedUrl = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+  }
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  return `<div class="event-video"><iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>`;
+}
+
 // ── Render past events ──
 function renderPastEvents(pastEvents) {
   if (!pastEvents || pastEvents.length === 0) {
@@ -533,6 +565,8 @@ function renderPastEvents(pastEvents) {
             ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
             ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
           </div>
+          ${ev.video ? renderVideo(ev.video) : ''}
+          ${ev.image ? `<img class="event-image" src="${ev.image}" alt="${ev.name}" loading="lazy">` : ''}
         </div>
       `;
     });
@@ -594,6 +628,7 @@ function renderDay(dayKey) {
           ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
           ${ev.recurrence ? `<span class="label">🗓️</span><span>${ev.recurrence}</span>` : ''}
         </div>
+        ${ev.video ? renderVideo(ev.video) : ''}
         ${ev.image ? `<img class="event-image" src="${ev.image}" alt="${ev.name}" loading="lazy">` : ''}
       </div>
     `;

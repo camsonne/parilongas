@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-04T05:32:38.445245Z",
+  "last_updated": "2026-04-05T04:21:01.901752Z",
   "days": {
     "0": {
       "name_fr": "DIMANCHE",
@@ -20,7 +20,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "quais-de-seine",
@@ -36,7 +37,8 @@
             "Facebook": "https://www.facebook.com/groups/191669634330805/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -60,7 +62,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -84,7 +87,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "la-cosy",
@@ -100,7 +104,8 @@
             "Site": "https://example.com/la-cosy"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -124,7 +129,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -148,7 +154,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -172,7 +179,8 @@
             "Site": "https://www.cascabelito.fr/pratiques/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "milonga-du-chat",
@@ -188,7 +196,8 @@
             "Facebook": "https://www.facebook.com/groups/1633867090170359"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "parisiana",
@@ -204,7 +213,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -212,7 +222,7 @@
     "6": {
       "name_fr": "SAMEDI",
       "name_en": "SATURDAY",
-      "date": "04/04/2026",
+      "date": "11/04/2026",
       "events": [
         {
           "id": "parisiana",
@@ -228,7 +238,8 @@
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "quais-de-seine",
@@ -244,7 +255,8 @@
             "Facebook": "https://www.facebook.com/groups/191669634330805/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []

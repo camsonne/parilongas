@@ -201,6 +201,23 @@
       object-fit: cover;
     }
 
+    /* ── VIDEO EMBED ── */
+    .event-video {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      padding-bottom: min(56.25%, 315px);
+      margin-top: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .event-video iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
     /* ── SECTION HEADERS ── */
     .section-header {
       font-size: 18px;
@@ -363,7 +380,7 @@
 // that scrapes organizer sources daily and commits the update.
 
 const SAMPLE_DATA = {
-  "last_updated": "2026-04-04T05:32:38.445245Z",
+  "last_updated": "2026-04-05T04:21:01.901752Z",
   "days": {
     "0": {
       "name_fr": "DIMANCHE",
@@ -384,7 +401,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "quais-de-seine",
@@ -400,7 +418,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/191669634330805/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -424,7 +443,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -448,7 +468,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "la-cosy",
@@ -464,7 +485,8 @@ const SAMPLE_DATA = {
             "Site": "https://example.com/la-cosy"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -488,7 +510,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -512,7 +535,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -536,7 +560,8 @@ const SAMPLE_DATA = {
             "Site": "https://www.cascabelito.fr/pratiques/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "milonga-du-chat",
@@ -552,7 +577,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/1633867090170359"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "parisiana",
@@ -568,7 +594,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -576,7 +603,7 @@ const SAMPLE_DATA = {
     "6": {
       "name_fr": "SAMEDI",
       "name_en": "SATURDAY",
-      "date": "04/04/2026",
+      "date": "11/04/2026",
       "events": [
         {
           "id": "parisiana",
@@ -592,7 +619,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/591405635447130"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         },
         {
           "id": "quais-de-seine",
@@ -608,7 +636,8 @@ const SAMPLE_DATA = {
             "Facebook": "https://www.facebook.com/groups/191669634330805/"
           },
           "recurrence": "",
-          "image": ""
+          "image": "",
+          "video": ""
         }
       ],
       "past_events": []
@@ -674,6 +703,21 @@ function renderHome() {
   `;
 }
 
+// ── Render video embed ──
+function renderVideo(url) {
+  if (!url) return '';
+  let embedUrl = url;
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+  if (ytMatch) {
+    embedUrl = `https://www.youtube-nocookie.com/embed/${ytMatch[1]}`;
+  }
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) {
+    embedUrl = `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  }
+  return `<div class="event-video"><iframe src="${embedUrl}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>`;
+}
+
 // ── Render past events ──
 function renderPastEvents(pastEvents) {
   if (!pastEvents || pastEvents.length === 0) {
@@ -708,6 +752,8 @@ function renderPastEvents(pastEvents) {
             ${linksHtml ? `<span class="label">🔗</span><span>${linksHtml}</span>` : ''}
             ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
           </div>
+          ${ev.video ? renderVideo(ev.video) : ''}
+          ${ev.image ? `<img class="event-image" src="${ev.image}" alt="${ev.name}" loading="lazy">` : ''}
         </div>
       `;
     });
@@ -769,6 +815,7 @@ function renderDay(dayKey) {
           ${ev.phone ? `<span class="label">📞</span><span>${ev.phone}</span>` : ''}
           ${ev.recurrence ? `<span class="label">🗓️</span><span>${ev.recurrence}</span>` : ''}
         </div>
+        ${ev.video ? renderVideo(ev.video) : ''}
         ${ev.image ? `<img class="event-image" src="${ev.image}" alt="${ev.name}" loading="lazy">` : ''}
       </div>
     `;
