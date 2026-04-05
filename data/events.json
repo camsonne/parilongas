@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-05T04:21:01.901752Z",
+  "last_updated": "2026-04-05T04:57:25.610950Z",
   "days": {
     "0": {
       "name_fr": "DIMANCHE",
@@ -179,7 +179,7 @@
             "Site": "https://www.cascabelito.fr/pratiques/"
           },
           "recurrence": "",
-          "image": "",
+          "image": "https://cascabelito.fr/wp-content/uploads/go-x/u/a48d89f2-fea8-45f7-952f-1795da625860/image.jpg",
           "video": ""
         },
         {
