@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-08T05:40:15.015195Z",
+  "last_updated": "2026-04-09T05:40:49.435182Z",
   "days": {
     "0": {
       "name_fr": "DIMANCHE",
@@ -113,7 +113,7 @@
     "3": {
       "name_fr": "MERCREDI",
       "name_en": "WEDNESDAY",
-      "date": "08/04/2026",
+      "date": "15/04/2026",
       "events": [
         {
           "id": "parisiana",
