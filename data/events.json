@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-04-11T05:35:14.905503Z",
+  "last_updated": "2026-04-12T05:43:50.309340Z",
   "days": {
     "0": {
       "name_fr": "DIMANCHE",
@@ -222,7 +222,7 @@
     "6": {
       "name_fr": "SAMEDI",
       "name_en": "SATURDAY",
-      "date": "11/04/2026",
+      "date": "18/04/2026",
       "events": [
         {
           "id": "parisiana",
